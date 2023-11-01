@@ -11,9 +11,9 @@ import Web3Core
 final public class TransactionPollingTask {
 
     private enum DelayUnit: UInt64 {
-        case shortest = 1_000_000_000
-        case medium = 1_500_000_000
-        case longest = 2_000_000_000
+        case shortest = 1_500_000_000
+        case medium = 2_500_000_000
+        case longest = 9_000_000_000
 
         func shouldIncreaseDelay(_ startTime: Date) -> Bool {
             let timePassed = Date().timeIntervalSince1970 - startTime.timeIntervalSince1970
