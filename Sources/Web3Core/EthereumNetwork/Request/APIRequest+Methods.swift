@@ -117,6 +117,19 @@ extension APIRequest {
         return try JSONDecoder().decode(APIResponse<Result>.self, from: data)
     }
 
+    // Compatibility overload kept for branches that call send with a prebuilt request.
+    public static func send<Result>(uRLRequest: URLRequest, with session: URLSession) async throws -> APIResponse<Result> {
+        let data = try await send(uRLRequest: uRLRequest, with: session)
+
+        if let LiteralType = Result.self as? LiteralInitiableFromString.Type {
+            guard let responseAsString = try? JSONDecoder().decode(APIResponse<String>.self, from: data) else { throw Web3Error.dataError }
+            guard let literalValue = LiteralType.init(from: responseAsString.result) else { throw Web3Error.dataError }
+            guard let result = literalValue as? Result else { throw Web3Error.typeError }
+            return APIResponse(id: responseAsString.id, jsonrpc: responseAsString.jsonrpc, result: result)
+        }
+        return try JSONDecoder().decode(APIResponse<Result>.self, from: data)
+    }
+
     public static func send(uRLRequest: URLRequest, with session: URLSession) async throws -> Data {
         let (data, response) = try await session.data(for: uRLRequest)
         
